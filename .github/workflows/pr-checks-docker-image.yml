@@ -1,0 +1,28 @@
+name: PR Checks
+
+on: [push, pull_request]
+
+env:
+  CI_SETTINGS__TUSK_VERSION: v0.5.1
+  CI_SETTINGS__APP_DOCKER_REPO: airtonix/phaser-tutorial-one_app
+
+jobs:
+
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Local bin path
+        run: echo "::add-path::~/bin"
+      - name: Install tusk
+        run: >-
+          curl -sL https://git.io/tusk | sh -s --
+          -b ~/bin $CI_SETTINGS__TUSK_VERSION
+      - uses: actions/checkout@v1
+      - name: Build ci image
+        run: >-
+          tusk ci:docker:build
+          --appname=app
+          --repo=$CI_SETTINGS__APP_DOCKER_REPO
+      - name: Run tests
+        run: tusk ci:app:test

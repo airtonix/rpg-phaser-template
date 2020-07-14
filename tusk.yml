@@ -1,0 +1,118 @@
+tasks:
+
+  dev:
+    run:
+      - >-
+        docker-compose
+        -f docker-compose.yml
+        -f docker-compose--local.yml
+        up app
+
+  dev:docker:run:
+    args:
+      service:
+        usage: docker-compose service name
+      command:
+        usage: command to run
+    run: >-
+      docker-compose
+      -f docker-compose.yml
+      -f docker-compose--local.yml
+      run --rm
+      ${service} ${command}
+
+  dev:setup:
+    run:
+      - task:
+          name: dev:docker:build
+          options:
+            service: app
+
+  dev:docker:build:
+    private: true
+    options:
+      service:
+          usage: docker compose service name
+    run:
+      - >-
+        docker-compose
+        -f ./docker-compose.yml
+        -f ./docker-compose--local.yml
+        build ${service}
+
+  dev:app:test:
+    run:
+      - task:
+          name: dev:docker:run
+          args:
+            - app
+            - tusk test:watch
+
+  dev:app:shell:
+    run:
+      - task:
+          name: dev:docker:run
+          args:
+            - app
+            - /bin/sh
+
+
+#
+# CI
+#
+  ci:setup:
+    run:
+      - task:
+          name: ci:docker:build
+          options:
+            appname: app
+            repo: airtonix/phaser-tutorial-one_app
+
+  ci:docker:build:
+    options:
+      appname:
+        usage: Directory to use
+      repo:
+        usage: Docker repository to use
+        type: string
+    run:
+    - command: docker pull ${repo}:builder || true
+    - command: >-
+        docker build ./${appname}
+        --cache-from ${repo}:builder
+        --file ./${appname}/Dockerfile
+        --tag ${repo}:builder
+    - command: docker pull ${repo}:latest || true
+    - command: >-
+        docker build ./${appname}
+        --cache-from ${repo}:builder
+        --cache-from ${repo}:latest
+        --file ./${appname}/Dockerfile
+        --tag ci_${appname}
+
+  ci:docker:publish:
+    options:
+      appname:
+        usage: the appname
+      tag:
+        usage: New docker tag
+    run:
+      - docker tag ci_${appname} ${tag}
+
+  ci:docker:run:
+    options:
+      appname:
+        usage: appname name
+      command:
+        usage: Command to run
+        type: string
+    run:
+      - docker run --rm ci_${appname} ${command}
+
+  ci:app:test:
+    run:
+      - task:
+          name: ci:docker:run
+          options:
+            appname: app
+            command: npm run test

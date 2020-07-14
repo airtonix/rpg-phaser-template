@@ -1,0 +1,29 @@
+tasks:
+  dev:
+    run: >-
+      tusk dev:serve
+
+  dev:serve:
+    run: >-
+      npx parcel serve
+      --hmr-port $HMR_PORT
+      --port $PORT
+      ./src/index.html
+
+  dev:extrude:tilemap:
+    run: >-
+      npx tile-extruder
+      --tileWidth 16
+      --tileHeight 32
+      --input ./src/Assets/0x72_DungeonTilesetII_v1.3.png
+      --output ./src/Assets/0x72_DungeonTilesetII_v1.3--extruded.png
+
+  test:
+    run:
+      - >-
+        npx ava
+
+  test:watch:
+    run:
+      - >-
+        npx ava --watch

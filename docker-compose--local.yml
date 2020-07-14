@@ -1,0 +1,21 @@
+version: "2.3"
+
+services:
+
+  app:
+    image: airtonix/phaser-game-test
+    build:
+      dockerfile: ./Dockerfile
+      context: ./app
+      target: install
+    ports:
+      - 3000:3000
+      - 3030:3030
+    environment:
+      - PORT=3000
+      - HMR_PORT=3030
+      - CHOKIDAR_USEPOLLING=1
+    command: tusk dev
+    volumes:
+      - ./app:/app
+      - /app/node_modules
