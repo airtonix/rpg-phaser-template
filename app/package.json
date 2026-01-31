@@ -16,7 +16,7 @@
     "babel-eslint": "^10.1.0",
     "core-js": "^3.6.5",
     "dat.gui": "^0.7.7",
-    "eslint": "^6.8.0",
+    "eslint": "^9.26.0",
     "images": "^3.2.2",
     "mistreevous": "^2.0.1",
     "mixwith": "^0.1.1",
